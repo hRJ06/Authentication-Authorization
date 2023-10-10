@@ -5,6 +5,7 @@ import com.Hindol.SpringSecurity.Model.User;
 import com.Hindol.SpringSecurity.Payload.JWTAuthenticationResponse;
 import com.Hindol.SpringSecurity.Payload.SignInDTO;
 import com.Hindol.SpringSecurity.Payload.SignUpDTO;
+import com.Hindol.SpringSecurity.Payload.SignUpResponse;
 import com.Hindol.SpringSecurity.Repository.OTPRepository;
 import com.Hindol.SpringSecurity.Repository.UserRepository;
 import com.Hindol.SpringSecurity.Service.AuthenticationService;
@@ -30,28 +31,31 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
     private JWTService jwtService;
     @Autowired
     private OTPRepository otpRepository;
-    public User signUp(SignUpDTO signUpDTO) {
+    public SignUpResponse signUp(SignUpDTO signUpDTO) {
         String providedOTP = signUpDTO.getOtp();
         Optional<OTP> latestOTP = otpRepository.findLatestByEmail(signUpDTO.getEmail());
         if(latestOTP.isPresent()) {
             OTP storedOTP = latestOTP.get();
             if(providedOTP.equals(storedOTP.getOTP())) {
-                System.out.println("HI");
+                Optional<User> existingUser = userRepository.findByEmail(signUpDTO.getEmail());
+                if(existingUser.isPresent()) {
+                    return SignUpResponse.USER_ALREADY_EXISTS;
+                }
                 User user = new User();
                 user.setEmail(signUpDTO.getEmail());
                 user.setFirstName(signUpDTO.getFirstName());
                 user.setLastName(signUpDTO.getLastName());
                 user.setRole(Role.USER);
                 user.setPassword(passwordEncoder.encode(signUpDTO.getPassword()));
-                return userRepository.save(user);
+                userRepository.save(user);
+                return SignUpResponse.SUCCESS;
             }
             else {
-                return null;
+                return SignUpResponse.OTP_VALIDATION_FAILED;
             }
-
         }
         else {
-            return null;
+            return SignUpResponse.OTP_VALIDATION_FAILED;
         }
     }
     public JWTAuthenticationResponse signIn(SignInDTO signInDTO) {

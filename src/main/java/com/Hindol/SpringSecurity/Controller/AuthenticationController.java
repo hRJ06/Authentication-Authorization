@@ -1,10 +1,7 @@
 package com.Hindol.SpringSecurity.Controller;
 
 import com.Hindol.SpringSecurity.Model.User;
-import com.Hindol.SpringSecurity.Payload.JWTAuthenticationResponse;
-import com.Hindol.SpringSecurity.Payload.OTPRequestDTO;
-import com.Hindol.SpringSecurity.Payload.SignInDTO;
-import com.Hindol.SpringSecurity.Payload.SignUpDTO;
+import com.Hindol.SpringSecurity.Payload.*;
 import com.Hindol.SpringSecurity.Service.AuthenticationService;
 import com.Hindol.SpringSecurity.Service.OTPService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +25,18 @@ public class AuthenticationController {
     private OTPService otpService;
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody SignUpDTO signUpDTO) {
-        User user = this.authenticationService.signUp(signUpDTO);
-        if(user != null) {
-            return ResponseEntity.ok(user);
+        SignUpResponse response  = this.authenticationService.signUp(signUpDTO);
+        if(response.equals(SignUpResponse.SUCCESS)) {
+            return ResponseEntity.ok("User Registered Successfully");
+        }
+        else if(response.equals(SignUpResponse.OTP_VALIDATION_FAILED)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("OTP Validation Failed");
+        }
+        else if(response.equals(SignUpResponse.USER_ALREADY_EXISTS)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists");
         }
         else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("OTP Validation Failed");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Internal Error");
         }
     }
     @PostMapping("/signIn")
