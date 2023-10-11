@@ -1,20 +1,13 @@
 package com.Hindol.SpringSecurity.Controller;
 
-import com.Hindol.SpringSecurity.Model.User;
 import com.Hindol.SpringSecurity.Payload.*;
 import com.Hindol.SpringSecurity.Service.AuthenticationService;
 import com.Hindol.SpringSecurity.Service.OTPService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -49,5 +42,33 @@ public class AuthenticationController {
         this.otpService.createOTP(otpRequestDTO.getEmail());
         return ResponseEntity.ok("OTP sent successfully");
     }
+
+    @PostMapping("/generate-reset-password-token")
+    public ResponseEntity<?> generateResetPasswordToken(@RequestBody ResetPasswordTokenRequest resetPasswordTokenRequest) {
+        ResetPasswordTokenResponse resetPasswordTokenResponse = this.authenticationService.resetPasswordToken(resetPasswordTokenRequest);
+        if(resetPasswordTokenResponse.equals(ResetPasswordTokenResponse.SUCCESS)) {
+             return ResponseEntity.ok("Check Your MAIL");
+        }
+        else if(resetPasswordTokenResponse.equals(ResetPasswordTokenResponse.USER_DOES_NOT_EXIST)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please Register");
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Internal Error");
+        }
+    }
+    @PutMapping("/reset-password/{token}")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordTokenRequest resetPasswordTokenRequest,@PathVariable String token) {
+        ResetPasswordTokenResponse resetPasswordTokenResponse = this.authenticationService.resetPassword(resetPasswordTokenRequest,token);
+        if(resetPasswordTokenResponse.equals(ResetPasswordTokenResponse.SUCCESS)) {
+            return ResponseEntity.ok("PASSWORD CHANGED SUCCESSFULLY");
+        }
+        else if(resetPasswordTokenResponse.equals(ResetPasswordTokenResponse.TOKEN_EXPIRED)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("TOKEN EXPIRED");
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("INVALID TOKEN");
+        }
+     }
+
 }
 
