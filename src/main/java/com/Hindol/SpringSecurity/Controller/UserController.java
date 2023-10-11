@@ -1,7 +1,9 @@
 package com.Hindol.SpringSecurity.Controller;
 
 import com.Hindol.SpringSecurity.Model.User;
+import com.Hindol.SpringSecurity.Payload.PasswordChangeDTO;
 import com.Hindol.SpringSecurity.Payload.UpdateUserDTO;
+import com.Hindol.SpringSecurity.Service.UserRoleService;
 import com.Hindol.SpringSecurity.Service.UserService;
 import jakarta.servlet.http.HttpServlet;
 import org.modelmapper.ModelMapper;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/user")
 public class UserController {
     @Autowired
-    private UserService userService;
+    private UserRoleService userService;
     @Autowired
     private ModelMapper modelMapper;
     @GetMapping
@@ -32,6 +34,22 @@ public class UserController {
             }
             else {
                 return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body("Internal Server Error");
+            }
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please provide a Token");
+        }
+    }
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changeUserPassword(@RequestBody PasswordChangeDTO passwordChangeDTO,@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            User user = this.userService.changePassword(passwordChangeDTO,token);
+            if(user != null) {
+                return ResponseEntity.ok("SUCCESSFULLY UPDATED PASSWORD");
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("PASSWORD DOESN'T MATCH");
             }
         }
         else {
