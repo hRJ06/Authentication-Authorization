@@ -4,10 +4,12 @@ import com.Hindol.SpringSecurity.Configuration.CONSTANT;
 import com.Hindol.SpringSecurity.Model.Role;
 import com.Hindol.SpringSecurity.Model.User;
 import com.Hindol.SpringSecurity.Repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
@@ -17,6 +19,10 @@ public class SpringSecurityApplication implements CommandLineRunner {
 	private UserRepository userRepository;
 	public static void main(String[] args) {
 		SpringApplication.run(SpringSecurityApplication.class, args);
+	}
+	@Bean
+	public ModelMapper modelMapper() {
+		return new ModelMapper();
 	}
 	public void run(String... args) {
 		User Admin = this.userRepository.findByRole(Role.ADMIN);

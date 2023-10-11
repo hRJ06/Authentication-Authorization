@@ -21,8 +21,6 @@ import com.Hindol.SpringSecurity.Model.OTP;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Service
