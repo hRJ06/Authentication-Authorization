@@ -1,19 +1,18 @@
     package com.Hindol.SpringSecurity.Model;
 
     import jakarta.persistence.*;
+    import lombok.Builder;
     import lombok.Data;
     import org.springframework.security.core.GrantedAuthority;
     import org.springframework.security.core.authority.SimpleGrantedAuthority;
     import org.springframework.security.core.userdetails.UserDetails;
-
-    import java.sql.Time;
     import java.sql.Timestamp;
     import java.util.Collection;
     import java.util.List;
 
     @Data
     @Entity
-    @Table(name = "user")
+    @Table(name = "users")
     public class User implements UserDetails {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
