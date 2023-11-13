@@ -13,6 +13,7 @@
 
     @Data
     @Entity
+    @EntityListeners(UserListener.class)
     @Table(name = "user")
     public class User implements UserDetails {
         @Id
